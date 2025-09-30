@@ -10,7 +10,9 @@ import com.terraformersmc.modmenu.util.mod.ModBadgeRenderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.cursor.StandardCursors;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.text.StringVisitable;
@@ -48,18 +50,15 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 	@Override
 	public void render(
 		DrawContext drawContext,
-		int index,
-		int y,
-		int x,
-		int rowWidth,
-		int rowHeight,
 		int mouseX,
 		int mouseY,
 		boolean hovered,
 		float delta
 	) {
-		x += getXOffset();
-		rowWidth -= getXOffset();
+        int x = this.getX() + this.getXOffset();
+        int y = this.getContentY();
+        int rowWidth = this.getContentWidth();
+//        int rowHeight = this.getContentHeight();
 		int iconSize = ModMenuConfig.COMPACT_LIST.getValue() ? COMPACT_ICON_SIZE : FULL_ICON_SIZE;
 		String modId = mod.getId();
 		if ("java".equals(modId)) {
@@ -92,7 +91,7 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 		drawContext.drawTextWithShadow(font,
 			Language.getInstance().reorder(trimmedName),
 			x + iconSize + 3,
-			y + 1,
+			y + 3,
 			0xFFFFFFFF
 		);
 
@@ -106,7 +105,7 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 		if (!ModMenuConfig.HIDE_BADGES.getValue()) {
 			new ModBadgeRenderer(
 				x + iconSize + 3 + font.getWidth(name) + 2 + updateBadgeXOffset,
-				y,
+				y + 2,
 				x + rowWidth,
 				mod,
 				list.getParent()
@@ -119,7 +118,7 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 				drawContext,
 				summary,
 				(x + iconSize + 3 + 4),
-				(y + client.textRenderer.fontHeight + 2),
+				(y + client.textRenderer.fontHeight + 4),
 				rowWidth - iconSize - 7,
 				2,
 				0xFF808080
@@ -129,7 +128,7 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 				drawContext,
 				mod.getPrefixedVersion(),
 				(x + iconSize + 3),
-				(y + client.textRenderer.fontHeight + 2),
+				(y + client.textRenderer.fontHeight + 4),
 				rowWidth - iconSize - 7,
 				2,
 				0xFF808080
@@ -150,10 +149,10 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 						iconSize,
 						iconSize
 					);
-					if (hoveringIcon) {
-						Throwable e = this.list.getParent().modScreenErrors.get(modId);
-						//this.list.getParent().setTooltip(this.client.textRenderer.wrapLines(ModMenuScreenTexts.configureError(modId, e), 175));
-					}
+//					if (hoveringIcon) {
+//						Throwable e = this.list.getParent().modScreenErrors.get(modId);
+//						this.list.getParent().setTooltip(this.client.textRenderer.wrapLines(ModMenuScreenTexts.configureError(modId, e), 175));
+//					}
 				} else {
 					int v = hoveringIcon ? iconSize : 0;
 					drawContext.drawTexture(
@@ -170,16 +169,19 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 						ColorHelper.getWhite(1.0F)
 					);
 				}
+				if (hoveringIcon) {
+					drawContext.setCursor(this.isClickable() ? StandardCursors.POINTING_HAND : StandardCursors.NOT_ALLOWED);
+				}
 			}
 		}
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int delta) {
+	public boolean mouseClicked(Click click, boolean doubleClick) {
 		list.select(this);
 		if (ModMenuConfig.QUICK_CONFIGURE.getValue() && this.list.getParent().getModHasConfigScreen(this.mod.getId())) {
 			int iconSize = ModMenuConfig.COMPACT_LIST.getValue() ? COMPACT_ICON_SIZE : FULL_ICON_SIZE;
-			if (mouseX - list.getRowLeft() <= iconSize) {
+			if (click.x() - list.getRowLeft() <= iconSize) {
 				this.openConfig();
 			} else if (Util.getMeasuringTimeMs() - this.sinceLastClick < 250) {
 				this.openConfig();

@@ -24,6 +24,8 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.screen.ScreenTexts;
@@ -205,7 +207,9 @@ public class ModsScreen extends Screen {
 					ConfirmLinkScreen.open(this, url, true);
 				} else {
 					var url = mod.getWebsite();
-					ConfirmLinkScreen.open(this, url, false);
+					if (url != null) {
+						ConfirmLinkScreen.open(this, url, false);
+					}
 				}
 			})
 			.position(this.rightPaneX + (urlButtonWidths / 2) - (cappedButtonWidth / 2), RIGHT_PANE_Y + 36)
@@ -220,7 +224,9 @@ public class ModsScreen extends Screen {
 					ConfirmLinkScreen.open(this, Urls.SNAPSHOT_BUGS, true);
 				} else {
 					var url = mod.getIssueTracker();
-					ConfirmLinkScreen.open(this, url, false);
+					if (url != null) {
+						ConfirmLinkScreen.open(this, url, false);
+					}
 				}
 			})
 			.position(this.rightPaneX + urlButtonWidths + 4 + (urlButtonWidths / 2) - (cappedButtonWidth / 2), RIGHT_PANE_Y + 36)
@@ -274,13 +280,13 @@ public class ModsScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		return super.keyPressed(keyCode, scanCode, modifiers) || this.searchBox.keyPressed(keyCode, scanCode, modifiers);
+	public boolean keyPressed(KeyInput input) {
+		return super.keyPressed(input) || this.searchBox.keyPressed(input);
 	}
 
 	@Override
-	public boolean charTyped(char chr, int keyCode) {
-		return this.searchBox.charTyped(chr, keyCode);
+	public boolean charTyped(CharInput input) {
+		return this.searchBox.charTyped(input);
 	}
 
 	@Override
@@ -399,7 +405,7 @@ public class ModsScreen extends Screen {
 				textRenderer,
 				Language.getInstance().reorder(trimmedName),
 				x + imageOffset,
-				RIGHT_PANE_Y + 1,
+				RIGHT_PANE_Y + 3,
 				0xFFFFFFFF,
 				true
 			);
@@ -413,7 +419,7 @@ public class ModsScreen extends Screen {
 			if (this.init || modBadgeRenderer == null || modBadgeRenderer.getMod() != mod) {
 				modBadgeRenderer = new ModBadgeRenderer(
 					x + imageOffset + client.textRenderer.getWidth(trimmedName) + 2,
-					RIGHT_PANE_Y,
+					RIGHT_PANE_Y + 2,
 					width - 28,
 					selectedEntry.mod,
 					this
@@ -430,7 +436,7 @@ public class ModsScreen extends Screen {
 					textRenderer,
 					mod.getPrefixedVersion(),
 					x + imageOffset,
-					RIGHT_PANE_Y + 2 + lineSpacing,
+					RIGHT_PANE_Y + 4 + lineSpacing,
 					0xFFAAAAAA,
 					true
 				);
@@ -523,7 +529,7 @@ public class ModsScreen extends Screen {
 		this.selected = entry;
 		String modId = selected.getMod().getId();
 
-		this.descriptionListWidget.updateSelectedModIfRequired(selected.getMod());
+		this.descriptionListWidget.updateSelectedMod(selected.getMod());
 
 		if (this.configureButton != null) {
 
